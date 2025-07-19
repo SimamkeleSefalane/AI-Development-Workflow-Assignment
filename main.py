@@ -8,23 +8,23 @@ import joblib
 # Load synthetic dataset
 def load_data(filepath='synthetic_patient_data.csv'):
     return pd.read_csv(filepath)
-
-from sklearn.preprocessing import StandardScaler
-from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import StandardScaler, LabelEncoder
 
 def preprocess(df):
-    # Encode 'gender' to numeric
-    df['gender'] = df['gender'].map({'Male': 0, 'Female': 1})
+    df = df.copy()
+    
+    # Drop rows with missing values
+    df = df.dropna()
 
-    # Handle missing values
-    imputer = SimpleImputer(strategy='mean')
-    df[['blood_pressure', 'cholesterol']] = imputer.fit_transform(df[['blood_pressure', 'cholesterol']])
+    # Encode categorical variables
+    le = LabelEncoder()
+    df['gender'] = le.fit_transform(df['gender'])  # Male=1, Female=0
 
-    # Separate features and target
-    X = df.drop(columns=['readmitted'])
+    # Split features and target
+    X = df.drop('readmitted', axis=1)
     y = df['readmitted']
 
-    # Scale features
+    # Feature scaling
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)
 
